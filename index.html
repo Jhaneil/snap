@@ -1,0 +1,293 @@
+<?php
+session_start();
+include 'db.php';
+
+// Redirect if logged in
+if (isset($_SESSION['username'])) {
+    header("Location: albums.php");
+    exit();
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SnapBox</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poiret+One&family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Quicksand', sans-serif;
+      height: 100vh;
+      background: linear-gradient(135deg, #6ee7b7, #3b82f6);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      position: relative;
+    }
+
+    .logo-container img {
+      width: 300px;
+      margin-bottom: 10px;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    }
+
+    h1 {
+      font-size: 3.5em;
+      font-family: 'Poiret One', cursive;
+      margin: 0;
+    }
+
+    p.tagline {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+    }
+
+    .start-btn {
+      background: white;
+      color: #3b82f6;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .start-btn:hover {
+      background: #3b82f6;
+      color: white;
+    }
+
+    /* Modal base style */
+    .modal {
+      display: none; /* hidden by default */
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    /* Show modal as flex container */
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      color: #333;
+      padding: 30px 25px 25px 25px;
+      border-radius: 12px;
+      width: 320px;
+      position: relative;
+      text-align: left;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+
+    .modal-content h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 22px;
+      cursor: pointer;
+      color: #999;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px 40px 10px 10px; /* leave room for icon */
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      position: relative;
+    }
+
+    button.submit-btn {
+      width: 100%;
+      padding: 10px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 1em;
+      transition: background 0.3s ease;
+    }
+
+    button.submit-btn:hover {
+      background: #2563eb;
+    }
+
+    .toggle-link {
+      color: #3b82f6;
+      text-align: center;
+      display: block;
+      margin-top: 15px;
+      cursor: pointer;
+      font-weight: 600;
+      user-select: none;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 0.8em;
+      opacity: 0.8;
+    }
+
+    /* Eye icon container */
+    .password-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .password-container input {
+      padding-right: 40px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      color: #999;
+      user-select: none;
+      transition: color 0.3s;
+    }
+
+    .toggle-password:hover {
+      color: #3b82f6;
+    }
+
+    /* Media Queries for Mobile */
+    @media screen and (max-width: 600px) {
+      .logo-container img {
+        width: 200px;  /* Make logo a little smaller on mobile */
+      }
+
+      h1 {
+        font-size: 2.5em;  /* Decrease heading size */
+      }
+
+      p.tagline {
+        font-size: 1em;  /* Decrease tagline font size */
+      }
+
+      .start-btn {
+        padding: 10px 20px;
+      }
+
+      .modal-content {
+        width: 90%;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo-container">
+    <img src="logo.png" alt="SnapBox Logo">
+  </div>
+  <h1>SnapBox</h1>
+  <p class="tagline">Capture. Keep. Cherish.</p>
+  <button class="start-btn" onclick="openModal('signin')">Start</button>
+
+  <footer>© Jhaneil Delos Reyes 2025.</footer>
+
+  <!-- Sign In Modal -->
+  <div id="signinModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('signin')">&times;</span>
+      <h2>Sign In</h2>
+      <form method="POST" action="login.php">
+        <input type="text" name="username" placeholder="Username" required autocomplete="username" />
+        <div class="password-container">
+          <input type="password" id="signin-password" name="password" placeholder="Password" required autocomplete="current-password" />
+          <span class="toggle-password" onclick="togglePassword('signin-password')">&#128065;</span>
+        </div>
+        <button type="submit" class="submit-btn">Sign In</button>
+      </form>
+      <span class="toggle-link" onclick="switchForm('signup')">Don't have an account?</span>
+    </div>
+  </div>
+
+  <!-- Sign Up Modal -->
+  <div id="signupModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('signup')">&times;</span>
+      <h2>Sign Up</h2>
+      <form method="POST" action="register.php">
+        <input type="text" name="username" placeholder="Username" required autocomplete="username" />
+        <div class="password-container">
+          <input type="password" id="signup-password" name="password" placeholder="Password" required autocomplete="new-password" />
+          <span class="toggle-password" onclick="togglePassword('signup-password')">&#128065;</span>
+        </div>
+        <button type="submit" class="submit-btn">Sign Up</button>
+      </form>
+      <span class="toggle-link" onclick="switchForm('signin')">Already have an account?</span>
+    </div>
+  </div>
+
+  <script>
+    function openModal(type) {
+      document.getElementById(type + 'Modal').classList.add('show');
+    }
+
+    function closeModal(type) {
+      document.getElementById(type + 'Modal').classList.remove('show');
+    }
+
+    function switchForm(type) {
+      closeModal(type === 'signup' ? 'signin' : 'signup');
+      openModal(type);
+    }
+
+    // Close modal if clicked outside the modal-content
+    window.onclick = function(event) {
+      ['signinModal', 'signupModal'].forEach(id => {
+        let modal = document.getElementById(id);
+        if(event.target === modal) {
+          modal.classList.remove('show');
+        }
+      });
+    }
+
+    function togglePassword(id) {
+      const input = document.getElementById(id);
+      const icon = input.nextElementSibling;
+      if (input.type === "password") {
+        input.type = "text";
+        icon.style.color = "#3b82f6"; // change icon color when active
+      } else {
+        input.type = "password";
+        icon.style.color = "#999";
+      }
+    }
+  </script>
+
+</body>
+</html>

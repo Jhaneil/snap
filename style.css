@@ -1,0 +1,53 @@
+/* Global background fix */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: linear-gradient(135deg, #6dd5ed, #2193b0) !important;
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Explode animation keyframes */
+@keyframes explode {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x), var(--y)) scale(0.5) rotate(720deg);
+  }
+}
+
+/* Explosion pieces styled as blue hearts */
+.explode-piece {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 10000;
+  animation: explode 0.8s forwards;
+  color: #3b82f6; /* bright blue color */
+  font-size: 20px;
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+  font-weight: bold;
+}
+
+/* Logo container */
+.logo-container {
+    background: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo-container img {
+    width: 200px; /* adjust logo size here */
+    height: auto;
+}
